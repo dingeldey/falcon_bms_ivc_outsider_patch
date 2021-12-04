@@ -4,7 +4,7 @@ conda activate kneeboard_dds_converter
 pyinstaller.exe -F -y --paths E:\programme\miniconda\pkgs\openssl-1.1.1l-h8ffe710_0\Library\bin ivc_outsiders_patch.py 
 
 rm -r .\build
-rm -r .\convert_to_kneeboard.spec
+rm -r .\ivc_outsiders_patch.spec
 
 New-Item -Path ".\" -Name "ivc_outsiders_patch" -ItemType "directory"
 Copy-Item .\README.md -Destination ".\ivc_outsiders_patch"
