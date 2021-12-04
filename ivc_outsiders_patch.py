@@ -2,10 +2,9 @@
 
 """
 import configparser
-import os.path
-import traceback
-import re
 from submodules.python_core_libs.logging.project_logger import Log
+import os
+from shutil import copyfile
 
 
 def read_file_lines(file_path):
@@ -20,11 +19,11 @@ def write_file_lines(file_path, lines):
 
 def replace_outsider(lines):
     logger = Log.instance().logger
-    logger.info("Parsing")
     for i, line in enumerate(lines):
         l: str = line
         res = l.find("outsiders")
         if res != -1:
+            logger.info(f"Replacing '{line[:-1]}' with 'outsiders = all' in file")
             lines[i] = "outsiders = all\n"
 
 
@@ -62,10 +61,63 @@ def work_on_ini(client_ini_path, client_ini_path_bkp, logger):
 
 
 def make_ini_backup(client_ini_path, client_ini_path_bkp):
-    from shutil import copyfile
-    copyfile(client_ini_path, client_ini_path_bkp)
+    logger = Log.instance().logger
+    if not os.path.isfile(client_ini_path_bkp):
+        logger.info(f"Creating backup-file {client_ini_path_bkp}")
+        copyfile(client_ini_path, client_ini_path_bkp)
+    else:
+        logger.info(f"Skipping creation of backup-file {client_ini_path_bkp} as it already exists.")
+
+
+def create_logger_ini():
+    logger_ini_content = """[formatters]
+keys=default
+
+[formatter_default]
+format=<%(levelname)-3s><%(asctime)s> %(message)s <%(filename)s:%(lineno)d>'
+class=logging.Formatter
+
+[handlers]
+keys=console, file
+
+[handler_console]
+class=logging.StreamHandler
+formatter=default
+args=tuple()
+
+[handler_file]
+class=logging.FileHandler
+level=INFO
+formatter=default
+args=("ivc_outsiders_patch.log", "w")
+
+[loggers]
+keys=root
+
+[logger_root]
+level=INFO
+formatter=default
+handlers=console,file"""
+
+    ini_exists: bool = os.path.isfile("ivc_outsiders_patch_logger.ini")
+    if not ini_exists:
+        with open("ivc_outsiders_patch_logger.ini", 'w') as f:
+            f.write(logger_ini_content)
+
+
+def remove_logger_ini():
+    ini_exists: bool = os.path.isfile("ivc_outsiders_patch_logger.ini")
+    if ini_exists:
+        os.remove("ivc_outsiders_patch_logger.ini")
 
 
 if __name__ == "__main__":
+    create_logger_ini()
+    logger = Log.instance().logger
+    Log.instance().set_ini("ivc_outsiders_patch_logger.ini")
+    logger.info("Start")
+    Log.instance().set_ini("ivc_outsiders_patch_logger.ini")
     main()
-    Log.instance().set_ini("logger.ini")
+
+    remove_logger_ini()
+
