@@ -1,4 +1,4 @@
 # README
 
 ## Howto use
-Place exe in your BMS root folder and run.
+Download exe in releases. Then place exe in your BMS root folder and run.
